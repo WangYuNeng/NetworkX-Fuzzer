@@ -9,7 +9,7 @@ init = FuzzInitializer()
 init.parse()
 generators, algorithms = init.initialize()
 
-GENERATOR_EXCEPTION = (ZeroDivisionError, ValueError, networkx.NetworkXError, xml.etree.ElementTree.ParseError, LookupError)
+GENERATOR_EXCEPTION = (ValueError, networkx.NetworkXError, xml.etree.ElementTree.ParseError, LookupError)
 ALGORITHM_EXCEPTION = (networkx.NetworkXError, networkx.NetworkXUnbounded)
 
 def report_fuzzer_inputs():
@@ -26,8 +26,17 @@ def report_fuzzer_inputs():
                                 bytestr = fh.read()
                                 print("bytes: <%s>" % bytestr)
                                 fdp = atheris.FuzzedDataProvider(bytestr)
-                                algo = fdp.PickValueInList(algorithms)
 
+                                if algorithms == []:
+                                        try:
+                                                generator = fdp.PickValueInList(generators)
+                                                graphs = generator.gen(fdp=fdp)
+                                        except GENERATOR_EXCEPTION as e:
+                                                return
+                                        
+                                        return
+
+                                algo = fdp.PickValueInList(algorithms)
                                 try:
                                         gs = [fdp.PickValueInList(generators).gen(fdp=fdp) for _ in range(algo.required_graph)]
                                 except GENERATOR_EXCEPTION:

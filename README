@@ -1,0 +1,44 @@
+## Setup
+```
+./run_docker.sh
+```
+
+## Fuzzer usage
+```
+usage: fuzzer.py [-h] [-g {0,1,2}] [-sp] [-mf] [-iso] [-l LOGGING] [-n RUNS]
+
+options:
+  -h, --help            show this help message and exit
+  -g {0,1,2}, --generator {0,1,2}
+                        select graph generator (0: basic, 1: structural, 2: both)
+  -sp, --shortest-path  fuzz shortest path algorithms
+  -mf, --max-flow       fuzz max flow algorithms
+  -iso, --isomorphism   fuzz isomorphism algorithms
+  -l LOGGING, --logging LOGGING
+                        log exception information to file
+  -n RUNS, --runs RUNS  times to run
+```
+
+## Reproduce results
+### Generator ZeroDivisionError
+Modify graph_generator.py:86
+```
+python3 printing.py -g 1
+```
+
+### Shortest-path
+```
+python3 printing.py -sp -g 1
+```
+
+### Max-flow
+Modify algorithm.py:66-67
+```
+python3 printing.py -mf -g 1
+```
+
+### Isomorphic
+Modify algorithm.py:93-95
+```
+printing.py -iso -g 1
+```

@@ -14,7 +14,7 @@ with atheris.instrument_imports():
     log_file = open(init.args.logging, 'w')
     log_file.write('python3 {}\n'.format(' '.join(sys.argv)))
 
-GENERATOR_EXCEPTION = (ZeroDivisionError, ValueError, networkx.NetworkXError, xml.etree.ElementTree.ParseError, LookupError)
+GENERATOR_EXCEPTION = (ValueError, networkx.NetworkXError, xml.etree.ElementTree.ParseError, LookupError)
 ALGORITHM_EXCEPTION = (networkx.NetworkXError, networkx.NetworkXUnbounded)
 
 def TestOneInput(data):

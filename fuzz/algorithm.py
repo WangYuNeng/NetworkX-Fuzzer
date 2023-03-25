@@ -36,14 +36,9 @@ class TestShortestPath(TestAlgorithm):
         assign_rand_weight(fdp, graph, non_negative=True)
         dijstra_len = dict(networkx.all_pairs_dijkstra_path_length(graph))
         bellman_ford_len = dict(networkx.all_pairs_bellman_ford_path_length(graph))
-        # johnson_len = networkx.johnson(graph)
-        # floyd_warshall_len = networkx.floyd_warshall(graph)
-        assert dijstra_len == bellman_ford_len # == johnson_len == floyd_warshall_len
-
-    # def _transform_fw(fw_len: dict):
-        
-    #     new_fw_len = {}
-    #     for node in fw_len
+        # print(graph.nodes)
+        # print(graph.adj)
+        assert dijstra_len == bellman_ford_len
 
     @property
     def name(self) -> str:
@@ -66,6 +61,11 @@ class TestMaxFlow(TestAlgorithm):
         preflow_push = networkx.flow.preflow_push(graph, src, dst, capacity='weight')
         dinitz = networkx.flow.dinitz(graph, src, dst, capacity='weight')
         boykov_kolmogorov = networkx.flow.boykov_kolmogorov(graph, src, dst, capacity='weight')
+
+        # Uncomment the next two lines to reproduce max-flow inconsistency
+        # assert edmonds_karp.graph['flow_value'] == shortest_augmenting_path.graph['flow_value'] == preflow_push.graph['flow_value'] \
+        #     == dinitz.graph['flow_value'] == boykov_kolmogorov.graph['flow_value']
+
         if  not (math.isclose(edmonds_karp.graph['flow_value'], shortest_augmenting_path.graph['flow_value']) and
                 math.isclose(edmonds_karp.graph['flow_value'], preflow_push.graph['flow_value']) and 
                 math.isclose(edmonds_karp.graph['flow_value'], dinitz.graph['flow_value']) and
@@ -88,12 +88,17 @@ class TestIsomorphic(TestAlgorithm):
         g2: networkx.Graph
 
         g1, g2 = graphs
-        if (len(g1.nodes) == 0 and len(g1.edges) == 0 and \
-                  len(g2.nodes) == 0 and len(g2.edges) == 0  ):
-            return
+
+        # Comment the next if statement to reproduce vf2/vf2pp inconsistency on null graph
+        # if (len(g1.nodes) == 0 and len(g1.edges) == 0 and \
+        #           len(g2.nodes) == 0 and len(g2.edges) == 0  ):
+        #     return
 
         vf2 = networkx.is_isomorphic(g1, g2)
         vf2pp = networkx.vf2pp_is_isomorphic(g1, g2)
+        print(g1, 'and', g2)
+        print('vf2 result:', vf2)
+        print('vf2pp result:', vf2pp)
 
         assert vf2 == vf2pp
 

@@ -81,8 +81,9 @@ class StructuralGenerator(GraphGenerator):
         return val
 
     def _rand_prob(self, fdp) -> float:
-        # val = fdp.ConsumeProbability()
         val = 0.5
+        # Uncomment the next line to reproduce the ZeroDivisionError
+        # val = fdp.ConsumeProbability() 
         if self._logging:
             print('prob =', val)
         return val
