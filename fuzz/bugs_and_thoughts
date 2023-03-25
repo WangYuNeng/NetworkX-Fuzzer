@@ -5,7 +5,9 @@ structuralfuzz
     divisionbyzero when p is small
     decorator error when param given is not integer
 
-    numerical error () in preflow_push algorithm
+    numerical error in shortest path
+    numerical error in preflow_push algorithm
+    vf2->True, vf2pp->False when two graphs are empty
 
 
 https://networkx.org/documentation/stable/reference/algorithms/shortest_paths.html#module-networkx.algorithms.shortest_paths.unweighted

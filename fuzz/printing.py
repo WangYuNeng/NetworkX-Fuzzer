@@ -2,12 +2,12 @@ import os
 import atheris
 import xml
 import networkx
-from graph_generator import BasicGenerator, StructuralGenerator
-from algorithm import TestShortestPath, TestMaxFlow
 
-generator = StructuralGenerator(n_max_node=5, max_seed=428)
-sp = TestShortestPath()
-flow = TestMaxFlow()
+from initialize import FuzzInitializer
+
+init = FuzzInitializer()
+init.parse()
+generators, algorithms = init.initialize()
 
 GENERATOR_EXCEPTION = (ZeroDivisionError, ValueError, networkx.NetworkXError, xml.etree.ElementTree.ParseError, LookupError)
 ALGORITHM_EXCEPTION = (networkx.NetworkXError, networkx.NetworkXUnbounded)
@@ -26,20 +26,18 @@ def report_fuzzer_inputs():
                                 bytestr = fh.read()
                                 print("bytes: <%s>" % bytestr)
                                 fdp = atheris.FuzzedDataProvider(bytestr)
+                                algo = fdp.PickValueInList(algorithms)
+
                                 try:
-                                        g = generator.gen(fdp, logging=True)
+                                        gs = [fdp.PickValueInList(generators).gen(fdp=fdp) for _ in range(algo.required_graph)]
                                 except GENERATOR_EXCEPTION:
-                                        continue
+                                        return
+
                                 try:
-                                        flow.test(fdp, [g])
+                                        algo.test(fdp=fdp, graphs=gs)
                                 except ALGORITHM_EXCEPTION:
                                         pass
 
-                                # try:
-                                #         sp.test(fdp, [g])
-                                # except ALGORITHM_EXCEPTION:
-                                #         pass
 
-                                print(list(g.nodes))
 #run_fuzzer()
 report_fuzzer_inputs()

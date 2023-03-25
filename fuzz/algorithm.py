@@ -1,4 +1,5 @@
 import networkx
+import math
 
 class TestAlgorithm:
 
@@ -11,6 +12,10 @@ class TestAlgorithm:
     @property
     def required_graph(self) -> int:
         return self._required_graph
+    
+    @property
+    def name(self) -> str:
+        return ''
 
 def assign_rand_weight(fdp, graph: networkx.Graph, non_negative=True):
     max = 1
@@ -40,6 +45,10 @@ class TestShortestPath(TestAlgorithm):
     #     new_fw_len = {}
     #     for node in fw_len
 
+    @property
+    def name(self) -> str:
+        return 'TestShortestPath'
+
 class TestMaxFlow(TestAlgorithm):
 
     def __init__(self) -> None:
@@ -57,13 +66,48 @@ class TestMaxFlow(TestAlgorithm):
         preflow_push = networkx.flow.preflow_push(graph, src, dst, capacity='weight')
         dinitz = networkx.flow.dinitz(graph, src, dst, capacity='weight')
         boykov_kolmogorov = networkx.flow.boykov_kolmogorov(graph, src, dst, capacity='weight')
-        if not edmonds_karp.graph['flow_value'] == shortest_augmenting_path.graph['flow_value'] == preflow_push.graph['flow_value'] \
-            == dinitz.graph['flow_value'] == boykov_kolmogorov.graph['flow_value']:
-            print(graph.nodes, graph.edges, src, dst)
-            print(edmonds_karp.graph['flow_value'], shortest_augmenting_path.graph['flow_value'], preflow_push.graph['flow_value'], dinitz.graph['flow_value'], boykov_kolmogorov.graph['flow_value'])
+        if  not (math.isclose(edmonds_karp.graph['flow_value'], shortest_augmenting_path.graph['flow_value']) and
+                math.isclose(edmonds_karp.graph['flow_value'], preflow_push.graph['flow_value']) and 
+                math.isclose(edmonds_karp.graph['flow_value'], dinitz.graph['flow_value']) and
+                math.isclose(edmonds_karp.graph['flow_value'], boykov_kolmogorov.graph['flow_value'])):
             assert False
         
+    @property
+    def name(self) -> str:
+        return 'TestMaxFlow'
 
-# class TestIsomorphic(TestAlgorithm):
+class TestIsomorphic(TestAlgorithm):
 
 
+    def __init__(self) -> None:
+        self._required_graph = 2
+
+    def test(self, fdp, graphs: list) -> None:
+
+        g1: networkx.Graph
+        g2: networkx.Graph
+
+        g1, g2 = graphs
+        if (len(g1.nodes) == 0 and len(g1.edges) == 0 and \
+                  len(g2.nodes) == 0 and len(g2.edges) == 0  ):
+            return
+
+        vf2 = networkx.is_isomorphic(g1, g2)
+        vf2pp = networkx.vf2pp_is_isomorphic(g1, g2)
+
+        assert vf2 == vf2pp
+
+        mapping = {node: fdp.ConsumeRegularFloat() for node in g1.nodes}
+        g1_relabel = networkx.relabel_nodes(g1, mapping=mapping)
+
+        if len(g1_relabel.nodes) != len(g1.nodes): # mapping might cause multiple nodes to merge into one
+            return
+        if len(g1.nodes) == 0:
+            return
+
+        assert networkx.is_isomorphic(g1, g1_relabel)
+        assert networkx.vf2pp_is_isomorphic(g1, g1_relabel)
+
+    @property
+    def name(self) -> str:
+        return 'TestIsomorphic'

@@ -12,6 +12,10 @@ class GraphGenerator:
         if self._logging:
             print(self._graph_type[type_id])
         return self._graph_type[type_id](fdp)
+    
+    @property
+    def name(self) -> str:
+        return ''
 
 class BasicGenerator(GraphGenerator):
 
@@ -41,6 +45,10 @@ class BasicGenerator(GraphGenerator):
         if len(data) < 5:
             return networkx.Graph()
         return networkx.from_sparse6_bytes(data)
+    
+    @property
+    def name(self) -> str:
+        return 'BasicGenerator'
 
 class StructuralGenerator(GraphGenerator):
 
@@ -85,18 +93,27 @@ class StructuralGenerator(GraphGenerator):
             print('seed =', val)
         return val
     
+    def _rand_directed(self, fdp) -> bool:
+        val = fdp.ConsumeBool()
+        if self._logging:
+            print('directed =', val)
+        return val
+    
     def _fast_gnp_random_graph(self, fdp) -> networkx.Graph:
         n_node, prob, seed = self._rand_n_node(fdp), self._rand_prob(fdp), self._rand_seed(fdp)
-        return networkx.fast_gnp_random_graph(n=n_node, p=prob, seed=seed)
+        directed = self._rand_directed(fdp)
+        return networkx.fast_gnp_random_graph(n=n_node, p=prob, seed=seed, directed=directed)
 
     def _gnp_random_graph(self, fdp) -> networkx.Graph:
         n_node, prob, seed = self._rand_n_node(fdp), self._rand_prob(fdp), self._rand_seed(fdp)
-        return networkx.gnp_random_graph(n=n_node, p=prob, seed=seed)
+        directed = self._rand_directed(fdp)
+        return networkx.gnp_random_graph(n=n_node, p=prob, seed=seed, directed=directed)
     
     def _gnm_random_graph(self, fdp) -> networkx.Graph:
         n_node, seed = self._rand_n_node(fdp), self._rand_seed(fdp)
         n_edge = self._rand_n_edge(fdp, n_node)
-        return networkx.gnm_random_graph(n=n_node, m=n_edge, seed=seed)
+        directed = self._rand_directed(fdp)
+        return networkx.gnm_random_graph(n=n_node, m=n_edge, seed=seed, directed=directed)
 
     def _dense_gnm_random_graph(self, fdp) -> networkx.Graph:
         n_node, seed = self._rand_n_node(fdp), self._rand_seed(fdp)
@@ -131,3 +148,7 @@ class StructuralGenerator(GraphGenerator):
     def _random_lobster(self, fdp) -> networkx.graph:
         n_node, prob1, prob2, seed = self._rand_n_node(fdp), self._rand_prob(fdp), self._rand_prob(fdp), self._rand_seed(fdp)
         return networkx.random_lobster(n=n_node, p1=prob1, p2=prob2, seed=seed)
+    
+    @property
+    def name(self) -> str:
+        return 'StructuralGenerator'
